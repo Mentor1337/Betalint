@@ -42,18 +42,18 @@ A comprehensive command-line tool to validate Betanet implementations against th
 
 ```bash
 # Download the linter
-curl -L -O https://raw.githubusercontent.com/your-org/betanet-linter/main/betanet_linter.py
-chmod +x betanet_linter.py
+curl -L -O https://raw.githubusercontent.com/Mentor1337/Betalint/refs/heads/main/Betalint.py
+chmod +x betalint.py
 
 # Verify installation
-python betanet_linter.py --help
+python betalint.py --help
 ```
 
 ### From Source
 
 ```bash
-git clone https://github.com/your-org/betanet-linter.git
-cd betanet-linter
+git clone https://github.com/Mentor1337/Betalint.git
+cd betalint
 python -m pip install -r requirements.txt
 ```
 
@@ -63,26 +63,26 @@ python -m pip install -r requirements.txt
 
 ```bash
 # Run compliance check on binary
-python betanet_linter.py --binary ./your-betanet-node
+python betalint.py --binary ./your-betanet-node
 
 # JSON output with file save
-python betanet_linter.py --binary ./your-betanet-node --output json --report-file report.json
+python betalint.py --binary ./your-betanet-node --output json --report-file report.json
 
 # Generate SBOM separately
-python betanet_linter.py --binary ./your-betanet-node --sbom-file sbom.json
+python betalint.py --binary ./your-betanet-node --sbom-file sbom.json
 
 # Verbose output for debugging
-python betanet_linter.py --binary ./your-betanet-node --verbose
+python betalint.py --binary ./your-betanet-node --verbose
 ```
 
 ### Advanced Usage
 
 ```bash
 # Use custom configuration
-python betanet_linter.py --binary ./betanet-node --config config.json
+python betalint.py --binary ./betanet-node --config config.json
 
 # Generate GitHub Action workflow
-python betanet_linter.py --generate-github-action > .github/workflows/compliance.yml
+python betalint.py --generate-github-action > .github/workflows/compliance.yml
 ```
 
 ## ⚙️ Configuration
@@ -194,7 +194,7 @@ DETAILED RESULTS:
 The linter includes a ready-made GitHub Action workflow. Generate it with:
 
 ```bash
-python betanet_linter.py --generate-github-action > .github/workflows/betanet-compliance.yml
+python betalint.py --generate-github-action > .github/workflows/betanet-compliance.yml
 ```
 
 Key features of the GitHub Action:
@@ -211,8 +211,8 @@ betanet-compliance:
   stage: test
   image: python:3.9
   script:
-    - curl -L -O https://raw.githubusercontent.com/your-org/betanet-linter/main/betanet_linter.py
-    - python betanet_linter.py --binary ./betanet-node --output json --report-file compliance-report.json
+    - curl -L -O https://raw.githubusercontent.com/Mentor1337/Betalint/refs/heads/main/Betalint.py
+    - python betalint.py --binary ./betanet-node --output json --report-file compliance-report.json
   artifacts:
     reports:
       junit: compliance-report.json
@@ -298,7 +298,7 @@ We welcome contributions to improve the linter:
 ### Development Setup
 
 ```bash
-git clone https://github.com/your-org/betanet-linter.git
+git clone https://github.com/Mentor1337/Betalint.git
 cd betanet-linter
 python -m venv venv
 source venv/bin/activate  # or `venv\Scripts\activate` on Windows
@@ -419,5 +419,5 @@ export BETANET_LINTER_TEST_MODE=1
 **Ready to validate your Betanet implementation? Start with:**
 
 ```bash
-python betanet_linter.py --binary ./your-betanet-binary --verbose
+python betalint.py --binary ./your-betanet-binary --verbose
 ```
