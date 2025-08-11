@@ -368,7 +368,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Documentation**: Check this README and inline help
 - **Issues**: Use GitHub issues for bug reports
 - **Discussions**: Use GitHub discussions for questions
-- **Security**: Send security issues to security@your-org.com
+- **Security**: Send security issues via GitHub for time being
 
 ## 🔄 Changelog
 
