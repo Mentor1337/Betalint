@@ -1,0 +1,68 @@
+#!/bin/bash
+# noise chacha poly1305 kyber x25519 quic tls
+case "$1" in
+  --help)
+    cat <<'H'
+usage: good_node [options]
+Supports tcp 443 quic udp tls ssl
+scion bridge gateway tunnel as-hop
+htx control stream transition
+H
+    ;;
+  --config-help)
+    cat <<'C'
+ticket carrier cookie query body x25519 hkdf sha256
+C
+    ;;
+  --version)
+    echo "Betanet GoodNode v1.1 http/2 http/3 adaptive cadence"
+    ;;
+  --protocols|--transports)
+    echo "/betanet/htx/1.1.0 /betanet/htxquic/1.1.0"
+    ;;
+  --bootstrap-help)
+    cat <<'B'
+Bootstrap methods: dht mdns bluetooth onion dns
+pow difficulty rate-limit
+beacon rotating rendezvous
+B
+    ;;
+  --privacy-help)
+    cat <<'P'
+Privacy modes: strict balanced performance
+nym mixnet hop relay
+beacon vrf entropy diversity
+P
+    ;;
+  --naming-help)
+    cat <<'N'
+Chains: handshake filecoin ethereum raven
+finality confirmation quorum
+emergency liveness governance certificate
+N
+    ;;
+  --payment-help)
+    cat <<'Pay'
+cashu voucher mint keyset frost
+lightning settlement redeem
+pow rate-limit validation
+Pay
+    ;;
+  --governance-help)
+    cat <<'G'
+vote weight uptime stake quorum
+cap concentration as org diversity
+partition path reachability safety
+G
+    ;;
+  --fallback-help)
+    echo "cover fallback correlation retry"
+    ;;
+  --build-info)
+    echo "slsa provenance reproducible attestation"
+    ;;
+  *)
+    echo "Unknown command"
+    ;;
+esac
+exit 0

@@ -1,0 +1,41 @@
+#!/bin/bash
+# noise chacha
+case "$1" in
+  --help)
+    echo "usage: partial_node [options]"; echo "Supports tcp 443 tls"
+    ;;
+  --config-help)
+    echo "ticket cookie"
+    ;;
+  --version)
+    echo "PartialNode v0.9 http/2"
+    ;;
+  --protocols|--transports)
+    echo "/betanet/htx/1.1.0"
+    ;;
+  --bootstrap-help)
+    echo "Bootstrap methods: dht mdns"
+    ;;
+  --privacy-help)
+    echo "Privacy modes: strict performance"
+    ;;
+  --naming-help)
+    echo "Chains: handshake"
+    ;;
+  --payment-help)
+    echo "cashu voucher"
+    ;;
+  --governance-help)
+    echo "vote weight"
+    ;;
+  --fallback-help)
+    echo "fallback"
+    ;;
+  --build-info)
+    echo "reproducible"
+    ;;
+  *)
+    echo "Unknown command"
+    ;;
+esac
+exit 0

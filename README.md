@@ -276,6 +276,9 @@ Non-critical (warnings only):
 - Some bootstrap methods
 - Advanced governance features
 
+
+
+
 ## 🛡️ Security Considerations
 
 The linter validates several security-critical aspects:

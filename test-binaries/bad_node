@@ -1,0 +1,13 @@
+#!/bin/bash
+case "$1" in
+  --help)
+    echo "bad node"
+    ;;
+  --version)
+    echo "0.1"
+    ;;
+  *)
+    echo "no"
+    ;;
+esac
+exit 0
