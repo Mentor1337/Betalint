@@ -1,10 +1,10 @@
 # Betanet v1.1 Specification Compliance Linter
 
-A comprehensive command-line tool to validate Betanet implementations against the official v1.1 specification requirements. This linter automatically checks all 11 mandatory compliance requirements from § 11 of the spec and generates detailed reports with Software Bill of Materials (SBOM).
+A command-line tool to validate Betanet implementations against the official v1.1 specification requirements. It checks all 13 compliance requirements and can produce detailed reports with an optional Software Bill of Materials (SBOM).
 
 ## 🚀 Features
 
-- **Complete Spec Coverage**: Validates all 11 requirements from § 11 Compliance Summary
+- **Complete Spec Coverage**: Validates 13 requirements from § 11 Compliance Summary
 - **Automated Testing**: Run against any Betanet binary implementation
 - **Detailed Reports**: Text and JSON output formats with evidence tracking
 - **SBOM Generation**: CycloneDX-compatible Software Bill of Materials
@@ -42,7 +42,7 @@ A comprehensive command-line tool to validate Betanet implementations against th
 
 ```bash
 # Download the linter
-curl -L -O https://raw.githubusercontent.com/Mentor1337/Betalint/refs/heads/main/Betalint.py
+curl -L -O https://raw.githubusercontent.com/Mentor1337/Betalint/refs/heads/main/betalint.py
 chmod +x betalint.py
 
 # Verify installation
@@ -53,7 +53,7 @@ python betalint.py --help
 
 ```bash
 git clone https://github.com/Mentor1337/Betalint.git
-cd betalint
+cd Betalint
 python -m pip install -r requirements.txt
 ```
 
@@ -84,6 +84,47 @@ python betalint.py --binary ./betanet-node --config config.json
 # Generate GitHub Action workflow
 python betalint.py --generate-github-action > .github/workflows/compliance.yml
 ```
+
+## 🔍 Testing with Included Binaries
+
+The `test-binaries` directory provides simple reference executables to verify that the linter and environment are set up correctly.
+
+# Test Binaries for Betalint
+
+This directory contains simple executable scripts used to exercise `betalint.py`:
+
+- `good_node`: Emits output strings satisfying all compliance checks. Running `betalint.py` against it results in full pass.
+- `partial_node`: Only implements a subset of features. The linter reports a mix of passes, warnings and failures.
+- `bad_node`: Minimal placeholder with almost no features. Most checks fail when linted.
+
+Use absolute paths when invoking `betalint.py` so it can locate the binaries when running from a temporary directory.
+
+### Linux / macOS (Unix)
+
+```bash
+# Make scripts executable
+chmod +x test-binaries/*
+
+# Run linter against sample nodes
+python betalint.py --binary test-binaries/good_node
+python betalint.py --binary test-binaries/partial_node
+python betalint.py --binary test-binaries/bad_node
+```
+
+### Windows
+
+The test binaries are POSIX shell scripts. Run them using an environment that provides Bash (e.g., Git Bash, Cygwin, or Windows Subsystem for Linux). May also require usage of dos2unix to convert line endings. Alternatively, you can run within WSL.
+
+```powershell
+# Using Git Bash from PowerShell
+bash test-binaries/good_node
+python betalint.py --binary test-binaries\good_node
+
+# Using WSL
+wsl {FILE PATH}/Betalint/test-binaries/good_node
+python betalint.py --binary test-binaries/good_node
+```
+
 
 ## ⚙️ Configuration
 
@@ -224,7 +265,7 @@ betanet-compliance:
     - main
 ```
 
-## 🧪 Testing Your Implementation
+## Testing Your Implementation
 
 ### Development Checklist
 
@@ -308,28 +349,7 @@ source venv/bin/activate  # or `venv\Scripts\activate` on Windows
 pip install -r requirements-dev.txt
 pre-commit install
 ```
-# Test Binaries for Betalint
 
-This directory contains simple executable scripts used to exercise `betalint.py`:
-
-- `good_node`: Emits output strings satisfying all compliance checks. Running `betalint.py` against it results in full pass.
-- `partial_node`: Only implements a subset of features. The linter reports a mix of passes, warnings and failures.
-- `bad_node`: Minimal placeholder with almost no features. Most checks fail when linted.
-
-Use absolute paths when invoking `betalint.py` so it can locate the binaries when running from a temporary directory.
-
-### Running Tests
-
-```bash
-# Unit tests
-python -m pytest test/
-
-# Integration tests
-python -m pytest tests/integration/
-
-# Test against reference implementation
-./scripts/test-reference-impl.sh
-```
 
 ## 📚 Reference Materials
 
