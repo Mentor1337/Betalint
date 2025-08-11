@@ -1,306 +1,78 @@
 name: Betanet Spec Compliance Check
 
+# This workflow runs the Betanet specification linter against a built
+# Betanet node implementation.  Copy this file to
+# `.github/workflows/compliance.yaml` in your project and adjust the build
+# and binary paths as needed.
+
 on:
   push:
     branches: [ main, develop ]
   pull_request:
     branches: [ main ]
-  release:
-    types: [ published ]
+
 
 jobs:
-  compliance-check:
+  compliance:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      pull-requests: write
-      actions: write
+
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'
-    
-    # Add your specific build steps here
-    - name: Install build dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y build-essential cmake
-        # Add other dependencies as needed
-        # For Rust: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-        # For Go: wget https://go.dev/dl/go1.21.linux-amd64.tar.gz && sudo tar -C /usr/local -xzf go1.21.linux-amd64.tar.gz
-    
-    - name: Build Betanet implementation
-      run: |
-        # Replace this with your actual build commands
-        echo "Building Betanet implementation..."
-        
-        # Example for Rust:
-        # cargo build --release
-        
-        # Example for Go:
-        # go build -o betanet-node ./cmd/main.go
-        
-        # Example for C++:
-        # mkdir build && cd build
-        # cmake .. && make -j$(nproc)
-        
-        # For now, create a dummy binary for demonstration
-        echo '#!/bin/bash' > betanet-node
-        echo 'echo "Betanet Node v1.1.0"' >> betanet-node
-        chmod +x betanet-node
-    
-    - name: Download Betanet Compliance Linter
-      run: |
-        curl -L -o betanet_linter.py https://raw.githubusercontent.com/your-org/betanet-linter/main/betanet_linter.py
-        chmod +x betanet_linter.py
-        
-        # Verify the linter
-        python betanet_linter.py --help
-    
-    - name: Run Betanet Spec Compliance Check
-      id: compliance_check
-      run: |
-        python betanet_linter.py \
-          --binary ./betanet-node \
-          --output json \
-          --report-file compliance-report.json \
-          --sbom-file sbom.json \
-          --verbose
-        
-        # Store results for later use
-        echo "compliance_status=$?" >> $GITHUB_OUTPUT
-    
-    - name: Generate compliance summary
-      run: |
-        python -c "
-        import json
-        with open('compliance-report.json', 'r') as f:
-            report = json.load(f)
-        
-        passed = report['passed']
-        failed = report['failed']
-        warnings = report['warnings']
-        total = report['total_requirements']
-        score = round((passed / total) * 100, 1)
-        
-        print(f'COMPLIANCE_SCORE={score}')
-        print(f'PASSED={passed}')
-        print(f'FAILED={failed}')
-        print(f'WARNINGS={warnings}')
-        print(f'TOTAL={total}')
-        " >> $GITHUB_ENV
-    
-    - name: Upload compliance artifacts
-      uses: actions/upload-artifact@v3
-      if: always()
-      with:
-        name: betanet-compliance-report
-        path: |
-          compliance-report.json
-          sbom.json
-        retention-days: 30
-    
-    - name: Comment on PR with compliance results
-      if: github.event_name == 'pull_request'
-      uses: actions/github-script@v6
-      with:
-        script: |
-          const fs = require('fs');
-          
-          // Read compliance report
-          let report;
-          try {
-            report = JSON.parse(fs.readFileSync('compliance-report.json', 'utf8'));
-          } catch (error) {
-            console.error('Failed to read compliance report:', error);
-            return;
-          }
-          
-          const passed = report.passed;
-          const failed = report.failed;
-          const warnings = report.warnings;
-          const total = report.total_requirements;
-          const score = Math.round((passed / total) * 100);
-          
-          // Generate status emoji
-          let statusEmoji = '🔴';
-          let statusText = 'Needs significant work';
-          if (score >= 90) {
-            statusEmoji = '🟢';
-            statusText = 'Excellent compliance!';
-          } else if (score >= 75) {
-            statusEmoji = '🟡';
-            statusText = 'Good progress, minor issues';
-          } else if (score >= 50) {
-            statusEmoji = '🟠';
-            statusText = 'Moderate compliance, several issues';
-          }
-          
-          // Build detailed results table
-          let detailsTable = '| Requirement | Status | Details |\n|---|---|---|\n';
-          for (const result of report.results) {
-            const statusIcon = {
-              'PASS': '✅',
-              'FAIL': '❌',
-              'WARN': '⚠️',
-              'SKIP': '⏭️'
-            }[result.status] || '❓';
-            
-            const reqName = result.requirement_id.replace(/_/g, ' ').toUpperCase();
-            detailsTable += `| ${reqName} | ${statusIcon} ${result.status} | ${result.details.substring(0, 100)}${result.details.length > 100 ? '...' : ''} |\n`;
-          }
-          
-          const comment = `## ${statusEmoji} Betanet v1.1 Spec Compliance Results
-          
-          **Overall Score: ${score}% (${passed}/${total} requirements)**
-          
-          ${statusText}
-          
-          ### Summary
-          - ✅ **Passed:** ${passed}
-          - ❌ **Failed:** ${failed}
-          - ⚠️ **Warnings:** ${warnings}
-          - ⏭️ **Skipped:** ${report.skipped || 0}
-          
-          ### Detailed Results
-          <details>
-          <summary>Click to expand detailed compliance check results</summary>
-          
-          ${detailsTable}
-          </details>
-          
-          ### Key Requirements Status
-          ${failed > 0 ? '🚨 **Critical Issues Found:**' : '🎉 **All Critical Requirements Met!**'}
-          
-          ${report.results.filter(r => r.status === 'FAIL').map(r => 
-            `- ❌ **${r.requirement_id.replace(/_/g, ' ').toUpperCase()}**: ${r.details}`
-          ).join('\n')}
-          
-          ### Next Steps
-          ${score >= 90 ? 
-            '✨ Excellent work! Your implementation is highly compliant with the Betanet v1.1 specification.' :
-            score >= 75 ?
-              '👍 Good job! Address the remaining issues to achieve full compliance.' :
-              '🔧 Please review and address the failed requirements. Focus on critical transport and security features first.'
-          }
-          
-          📊 **Full compliance report and SBOM available in workflow artifacts.**
-          
-          ---
-          *Generated by [Betanet Compliance Linter](https://github.com/your-org/betanet-linter) v1.1.0*`;
-          
-          // Find existing comment to update
-          const comments = await github.rest.issues.listComments({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-          });
-          
-          const existingComment = comments.data.find(comment => 
-            comment.user.login === 'github-actions[bot]' && 
-            comment.body.includes('Betanet v1.1 Spec Compliance Results')
-          );
-          
-          if (existingComment) {
-            // Update existing comment
-            await github.rest.issues.updateComment({
-              comment_id: existingComment.id,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: comment
-            });
-          } else {
-            // Create new comment
-            await github.rest.issues.createComment({
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      # --- Build your Betanet implementation -------------------------------
+      - name: Build Betanet binary
+        run: |
+          # TODO: replace with commands that build your Betanet node
+          echo "Build steps go here"
+          # Example:
+          # cargo build --release
+          # resulting binary at ./target/release/betanet-node
+
+      # --- Run the compliance linter --------------------------------------
+      - name: Download Betanet compliance linter
+        run: |
+          curl -L -o betalint.py https://raw.githubusercontent.com/Mentor1337/Betalint/main/Betalint.py
+          chmod +x betalint.py
+
+      - name: Run compliance check
+        run: |
+          # Update --binary path to point at the built Betanet binary
+          python betalint.py \
+            --binary ./path/to/betanet-node \
+            --output json \
+            --report-file compliance-report.json \
+            --sbom-file sbom.json
+
+      - name: Upload compliance report
+        uses: actions/upload-artifact@v3
+        with:
+          name: betanet-compliance-report
+          path: |
+            compliance-report.json
+            sbom.json
+
+      - name: Comment results on pull requests
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const report = JSON.parse(fs.readFileSync('compliance-report.json', 'utf8'));
+            const passed = report.passed;
+            const total = report.total_requirements;
+            const score = Math.round((passed / total) * 100);
+            const comment = `## 🔍 Betanet Spec Compliance\n\n**Score:** ${score}% (${passed}/${total})\n- ✅ Passed: ${report.passed}\n- ❌ Failed: ${report.failed}\n- ⚠️ Warnings: ${report.warnings}\n\nFull report available in workflow artifacts.`;
+            github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: comment
             });
-          }
-    
-    - name: Set compliance status check
-      if: github.event_name == 'pull_request'
-      uses: actions/github-script@v6
-      with:
-        script: |
-          const score = parseInt(process.env.COMPLIANCE_SCORE);
-          const state = score >= 75 ? 'success' : score >= 50 ? 'pending' : 'failure';
-          const description = `${score}% compliance (${process.env.PASSED}/${process.env.TOTAL} requirements)`;
           
-          await github.rest.repos.createCommitStatus({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            sha: context.payload.pull_request.head.sha,
-            state: state,
-            target_url: `${context.payload.repository.html_url}/actions/runs/${context.runId}`,
-            description: description,
-            context: 'Betanet Spec Compliance'
-          });
-    
-    - name: Fail workflow if critical requirements failed
-      if: steps.compliance_check.outputs.compliance_status != '0'
-      run: |
-        echo "❌ Compliance check failed with critical errors"
-        echo "Score: ${{ env.COMPLIANCE_SCORE }}%"
-        echo "Failed requirements: ${{ env.FAILED }}"
-        
-        if [ "${{ env.FAILED }}" -gt "3" ]; then
-          echo "Too many failed requirements (${{ env.FAILED }}). Please address critical issues."
-          exit 1
-        else
-          echo "Some requirements failed, but not blocking the workflow."
-          exit 0
-        fi
-
-  # Optional: Security scan
-  security-scan:
-    runs-on: ubuntu-latest
-    needs: compliance-check
-    if: github.event_name == 'pull_request'
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@master
-      with:
-        scan-type: 'fs'
-        scan-ref: '.'
-        format: 'sarif'
-        output: 'trivy-results.sarif'
-    
-    - name: Upload Trivy scan results to GitHub Security tab
-      uses: github/codeql-action/upload-sarif@v2
-      if: always()
-      with:
-        sarif_file: 'trivy-results.sarif'
-
-  # Optional: Release compliance validation
-  release-compliance:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'release'
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Download release binary
-      run: |
-        # Replace with actual download logic for your releases
-        echo "Download and validate release binary compliance"
-        
-    - name: Validate release compliance
-      run: |
-        # Run full compliance check on release binary
-        # Should require 100% compliance for releases
-        echo "Validate release meets 100% compliance requirements"
-        
-    - name: Create compliance attestation
-      run: |
-        # Generate SLSA compliance attestation
-        echo "Generate compliance attestation for release"

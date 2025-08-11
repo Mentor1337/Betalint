@@ -1,0 +1,2 @@
+# Betanet compliance linter uses only Python standard library
+# This file exists so workflow can install dependencies if needed
