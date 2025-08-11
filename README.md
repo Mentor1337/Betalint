@@ -302,18 +302,27 @@ We welcome contributions to improve the linter:
 
 ```bash
 git clone https://github.com/Mentor1337/Betalint.git
-cd betanet-linter
+cd Betalint
 python -m venv venv
 source venv/bin/activate  # or `venv\Scripts\activate` on Windows
 pip install -r requirements-dev.txt
 pre-commit install
 ```
+# Test Binaries for Betalint
+
+This directory contains simple executable scripts used to exercise `betalint.py`:
+
+- `good_node`: Emits output strings satisfying all compliance checks. Running `betalint.py` against it results in full pass.
+- `partial_node`: Only implements a subset of features. The linter reports a mix of passes, warnings and failures.
+- `bad_node`: Minimal placeholder with almost no features. Most checks fail when linted.
+
+Use absolute paths when invoking `betalint.py` so it can locate the binaries when running from a temporary directory.
 
 ### Running Tests
 
 ```bash
 # Unit tests
-python -m pytest tests/
+python -m pytest test/
 
 # Integration tests
 python -m pytest tests/integration/

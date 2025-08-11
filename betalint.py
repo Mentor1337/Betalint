@@ -83,7 +83,7 @@ class BetanetLinter:
     """Main linter class for Betanet spec compliance"""
 
     def __init__(self, binary_path: str, config: Optional[Dict] = None):
-        self.binary_path = Path(binary_path)
+        self.binary_path = Path(binary_path).resolve()
         self.config = config or {}
         self.temp_dir = Path(tempfile.mkdtemp())
         self.results: List[ComplianceResult] = []

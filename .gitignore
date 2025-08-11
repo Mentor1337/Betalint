@@ -170,3 +170,5 @@ test_*.json
 *_test.json
 output*.json
 results*.json
+*report*.json
+*sbom*.json
